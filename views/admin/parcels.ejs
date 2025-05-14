@@ -1,0 +1,175 @@
+<%- include('../layout/admin_header.ejs') %>
+      <!-- Right side column. Contains the navbar and content of the page -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Parcel Table
+            <small>All percels are shown here</small>
+            <a href="/newparcel" class="btn btn primary">Add Parcel</a>
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="/chart">chart</a></li>
+            <li class="active">Parcels tables</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              <% if(error_msg && error_msg.length > 0){ %>
+                <div class="alert alert-danger alert-dismissible  show" role="alert">
+                    <strong>Error!</strong> <%= error_msg[0] %>              
+                </div>
+              <% } %>
+              <% if(success_msg && success_msg.length > 0){ %>
+                <div class="alert alert-success alert-dismissible show" role="alert">
+                    <strong>Success!</strong>  <%= success_msg[0] %>              
+                </div>
+              <% } %>
+              
+              <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title">Data Table With Full parcel data</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+
+                  <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Tracking Id</th>
+                        <th>Receivers Name</th>
+                        <th>Delivery Location</th>
+                        <th>Current Location</th>
+                        <th>Status</th>
+                        <th>Expected Time</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if(parcels.length > 0) { %>
+                        <% let x = 1 %>
+                        <% parcels.forEach(parcel => { %>
+                          <tr class="text-capitalize">
+                            <td><%= x++ %></td>
+                            <td><%= parcel.tracking_id %></td>
+                            <td><%= parcel.receiver_name %></td>
+                            <td><%= parcel.delivery_location %></td>
+                            <% if(typeof parcel.current_location == "object"){ %>
+                              <td>warehouse</td>
+                            <% }else{ %>
+                                <td><%= parcel.current_location %></td>
+                            <% } %>
+                            <% if(parcel.status == "in transit"){ %>
+                              <td class="text-primary text-center text-bold"> <a href="/newroute/<%= parcel.tracking_id %>" style="text-decoration: none; color: blue;"><%= parcel.status %></a></td>
+                            <% }else if(parcel.status == "delayed") {%>
+                                <td class="text-danger text-bold"><a href="/newissue/<%= parcel.tracking_id %>" style="text-decoration: none; color: red;"><%= parcel.status %></a></td>
+                            <% }else if(parcel.status == "arrived" || parcel.status == "delivered"  ) {%>
+                                <td class="text-success text-bold"> <a href="/newroute/<%= parcel.tracking_id %>" style="text-decoration: none; color: green;"> <%= parcel.status %></td></a>
+                            <% }else{%>
+                              <td class="text-center "><%= parcel.status %></td>
+                            <% }%>
+                            <td>
+                              <%= parcel.expected_arrival_time %></td>
+                            <td>
+                              <div class="d-flex justify-content-center align-items-center">
+                                
+                                <a href="/parcel/<%= parcel.tracking_id %>/start" class="my-3 d-flex justify-content-center align-items-center btn btn-warning">
+                                  <i class="fa fa-rocket" aria-hidden="true"></i>
+                                </a>
+                                <a href="/newroute/<%= parcel.tracking_id %>" class="my-3 d-flex justify-content-center align-items-center btn btn-primary">
+                                  <i class="fa fa-road" aria-hidden="true"></i> 
+                                </a>
+                                <a href="/parcel_update?update_id=<%= parcel.id %>" class="my-3 d-flex justify-content-center align-items-center btn btn-info">
+                                  <i class="fa fa-pencil-square" aria-hidden="true"></i>
+                                </a>
+
+                                <% if(parcel.is_active == 'true'){%>
+
+                                  <a href="/parcel/<%= parcel.tracking_id %>/feeze" class="my-3 d-flex justify-content-center align-items-center btn btn-danger">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                  </a>
+                                <% } else { %>
+                                  <a href="/parcel/<%= parcel.tracking_id %>/unfreeze" class="my-3 d-flex justify-content-center align-items-center btn btn-warning">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                  </a>
+                                  
+                                <% }  %>
+
+                              </div>
+                            </td>
+                            
+                          </tr>
+                        <% }); %>
+                      <% }else{ %>
+                        <tr>
+                          <td colspan = "9">
+                            No Record
+                          </td>
+                        </tr>
+                      <% }; %>
+                      
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>#</th>
+                        <th>Tracking Id</th>
+                        <th>Receivers Name</th>
+                        <th>Delivery Location</th>
+                        <th>Current Location</th>
+                        <th>Status</th>
+                        <th>Expected Time</th>
+                        <th>Action</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+      <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+          <b>Version</b> 2.0
+        </div>
+        <strong>Copyright &copy; 2014-2015 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights reserved.
+      </footer>
+    </div><!-- ./wrapper -->
+
+    <!-- jQuery 2.1.3 -->
+    <script src="../../plugins/jQuery/jQuery-2.1.3.min.js"></script>
+    <!-- Bootstrap 3.3.2 JS -->
+    <script src="../../bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <!-- DATA TABES SCRIPT -->
+    <script src="../../plugins/datatables/jquery.dataTables.js" type="text/javascript"></script>
+    <script src="../../plugins/datatables/dataTables.bootstrap.js" type="text/javascript"></script>
+    <!-- SlimScroll -->
+    <script src="../../plugins/slimScroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+    <!-- FastClick -->
+    <script src='../../plugins/fastclick/fastclick.min.js'></script>
+    <!-- AdminLTE App -->
+    <script src="../../dist/js/app.min.js" type="text/javascript"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="../../dist/js/demo.js" type="text/javascript"></script>
+    <!-- page script -->
+    <script type="text/javascript">
+      $(function () {
+        $("#example1").dataTable();
+        $('#example2').dataTable({
+          "bPaginate": true,
+          "bLengthChange": false,
+          "bFilter": false,
+          "bSort": true,
+          "bInfo": true,
+          "bAutoWidth": false
+        });
+      });
+    </script>
+
+  </body>
+</html>

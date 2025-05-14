@@ -1,0 +1,161 @@
+
+<%- include('../layout/admin_header.ejs') %>
+
+<!-- Right side column. Contains the navbar and content of the page -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
+    <h1>
+      Parcel Registration
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+      <li><a href="/parcel">view Percel</a></li>
+      <li class="active">New Parcel page</li>
+    </ol>
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="row d-flex justify-content-center ">
+      <div class="col-md-8">
+
+        <div class="box box-danger">
+          <div class="box-header">
+            <h3 class="box-title">New Parcel</h3>
+          </div>
+
+          <!-- alert -->
+          <% if(error_msg && error_msg.length > 0){ %>
+          <div class="alert alert-danger alert-dismissible show" role="alert">
+            <strong>Error!</strong>  <%= error_msg[0] %>              
+        </div>
+        <% } %>
+  
+            <!-- end alert -->
+
+          <form action="/parcel_update" method="post">
+            <div class="box-body">
+              
+              <div class="row">
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Sender Name</label>
+                    <input type="text" class="form-control" value="<%= parcel.sender_name %>" name="sName" placeholder="Enter Sender Name..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Sender phone:</label>
+                    <input type="text" class="form-control" value="<%= parcel.sender_phone %>"  name="sPhone" placeholder="Enter Sender Phone Number..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Reciever Name</label>
+                    <input type="text" class="form-control" value="<%= parcel.receiver_name %>"  name="rName" placeholder="Enter Reciever Name..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Receiver phone:</label>
+                    <input type="text" class="form-control" value="<%= parcel.receiver_phone %>"  name="rPhone" placeholder="Enter Reciever Phone Number..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>receiver email:</label>
+                    <input type="text" class="form-control" value="<%= parcel.receiver_email %>"  name="rEmail" placeholder="Enter Reciever Email..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>pickup location</label>
+                    <input type="text" class="form-control" value="<%= parcel.pickup_location %>"  name="pickup" placeholder="Enter pickup location..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>parcel Destination:</label>
+                    <input type="text" class="form-control" value="<%= parcel.delivery_location %>"  name="destination" placeholder="Enter parcel Destination..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <label>weight:</label>
+                    <input type="text" class="form-control" value="<%= parcel.weight %>"  name="weight" placeholder="Enter Parcel Weight In kg..."/>
+                  </div>
+                </div>
+
+  
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Parcel Description </label>
+                    <textarea class="form-control"   name="desc" rows="3" placeholder="Enter ...">
+                      <%= parcel.parcel_description %>
+                    </textarea>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>note </label>
+                    <textarea class="form-control"   name="note" rows="3" placeholder="Enter ...">
+                      <%= parcel.note %>
+                    </textarea>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <input type="text" class="form-control" value="<%= parcel.id %>" name="update_id" placeholder="Enter Sender Name..."/>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <input type="text" class="form-control" value="<%= parcel.tracking_id %>" name="track_id" placeholder="Enter Sender Name..."/>
+                  </div>
+                </div>
+
+                <div class="col-md-12">
+                  <div class="form-group">
+                    <button class="btn btn-primary" >Edit parcel</button>
+                  </div>
+                </div>
+
+
+
+              </div> 
+            </div><!-- /.box-body -->
+          </form>
+        </div><!-- /.box -->
+
+        
+
+      </div><!--left row -->
+      <!-- <div class="col-md-4 bg-success">
+        helo
+      </div> -->
+      
+    </div><!-- /.row -->
+
+  </section><!-- /.content -->
+
+</div><!-- /.content-wrapper -->
+<footer class="main-footer">
+  <div class="pull-right hidden-xs">
+    <b>Version</b> 2.0
+  </div>
+  <strong>Copyright &copy; 2014-2015 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>Backend By<a href="http://codedcraft.com">codedcraft</a>.</strong> All rights reserved.
+</footer>
+   
+<%- include('../layout/admin_footer.ejs') %>

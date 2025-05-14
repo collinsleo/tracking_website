@@ -1,0 +1,121 @@
+<%- include('../layout/admin_header.ejs') %>
+
+      <!-- Right side column. Contains the navbar and content of the page -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Report Table
+            <div class="btn btn-dark" onclick="window.print()" >print</div>
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="/chart">chart</a></li>
+            <li class="active">Report table</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              <% if(error_msg && error_msg.length > 0){ %>
+                <div class="alert alert-danger alert-dismissible  show" role="alert">
+                    <strong>Error!</strong> <%= error_msg[0] %>              
+                </div>
+              <% } %>
+              <% if(success_msg && success_msg.length > 0){ %>
+                <div class="alert alert-success alert-dismissible show" role="alert">
+                    <strong>Success!</strong>  <%= success_msg[0] %>              
+                </div>
+              <% } %>
+              
+              <div class="box">
+                <div class="box-header">
+                  <a href="/">
+                    <img src="assets/img/resource/logo-3.png" alt="Logo">
+                  </a>
+                  <h3 class="box-title">Query Report</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                  <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Tracking Id</th>
+                        <th>route Id</th>
+                        <th>Current Location</th>
+                        <th>description</th>
+                        <th>Status</th>
+                        <th>Executed Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if(reports.length > 0) { %>
+                        <% let x = 1 %>
+                        <% reports.forEach(parcel => { %>
+                          <tr class="text-capitalize">
+                            <td><%= x++ %></td>
+                            <td><%= parcel.tracking_id %></td>
+                            <td><%= parcel.route_id %></td>
+                            <% if(typeof parcel.current_location == "object"){ %>
+                              <td>warehouse</td>
+                            <% }else{ %>
+                                <td><%= parcel.current_location %></td>
+                            <% } %>
+                            
+
+                            <td > <%= parcel.description %> </td>
+                            <% if(parcel.status == "in transit"){ %>
+                              <td class="text-primary text-center text-bold" style="text-decoration: none; color: blue;"><%= parcel.status %></td>
+                            <% }else if(parcel.status == "delayed"){ %>
+                              <td class="text-primary text-center text-bold" style="text-decoration: none; color: red;"><%= parcel.status %></td>
+                            <% }else if(parcel.status == "resolved"){ %>
+                              <td class="text-primary text-center text-bold"  style="text-decoration: none; color: black;"><%= parcel.status %></td>
+                            <% }else if(parcel.status == "arrived" || parcel.status == "delivered"){ %>
+                              <td class="text-primary text-center text-bold"  style="text-decoration: none; color: green;"><%= parcel.status %></td>
+                            <% }else if(parcel.status == "arrived late"){ %>
+                              <td class="text-primary text-center text-bold" style="text-decoration: none; color: orange;"><%= parcel.status %></td>
+                            <% }else{ %>
+                              <td class=" text-center text-bold"> <%= parcel.status %></td>
+
+                            <% } %>
+                            <td>
+                              <%= parcel.created_at %>
+                            </td>                            
+                          </tr>
+                        <% }); %>
+                      <% }else{ %>
+                        <tr>
+                          <td colspan = "9">
+                            No Record
+                          </td>
+                        </tr>
+                      <% }; %>
+                      
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>#</th>
+                        <th>Tracking Id</th>
+                        <th>Receivers Name</th>
+                        <th>Delivery Location</th>
+                        <th>Current Location</th>
+                        <th>Status</th>
+                        <th>Expected Time</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+      <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+          <b>Version</b> 2.0
+        </div>
+        <strong>Copyright &copy; 2014-2015 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights reserved.
+      </footer>
+<%- include('../layout/admin_footer.ejs') %>

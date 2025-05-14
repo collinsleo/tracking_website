@@ -1,0 +1,228 @@
+<%- include('../layout/admin_header.ejs') %>
+
+      <!-- Right side column. Contains the navbar and content of the page -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Problem Registration
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="/route">view Route</a></li>
+            <li class="active">New Problem page</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row d-flex justify-content-center ">
+            <div class="col-md-8">
+
+              <div class="box box-danger text-capitalize">
+                <div class="box-header" >
+                  <p class="text-danger h5 text-bold"><%= info %></h3>
+                  
+                </div>
+                  <!-- alert -->
+                  <% if(error_msg && error_msg.length > 0){ %>
+                    <div class="alert alert-danger alert-dismissible  show" role="alert">
+                      <strong>Error!</strong>  <%= error_msg[0] %>              
+                  </div>
+                  <% } %>
+                  <% if(success_msg && success_msg.length > 0){ %>
+                    <div class="alert alert-success alert-dismissible  show" role="alert">
+                      <strong>Success!</strong>  <%= success_msg[0] %>              
+                  </div>
+                  <% } %>
+                 
+          
+                    <!-- end alert -->
+
+                <form action="/newissue/<%= track_id %>?route_id=<%=  route_id %>" method="post">
+                  <div class="box-body">
+                   
+                    <div class="row">
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Track Id*</label>
+                          <input type="text" readonly value="<%= track_id%>" class="form-control" name="track_id" placeholder="Enter Track Id..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Route Id*:</label>
+                          <input type="text" value="<%= route_id%>" class="form-control" name="route_id" placeholder="Enter starting location..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>reported by*</label>
+                          <input type="text" class="form-control" name="reported_by" placeholder="Enter Stoping location..."/>
+                        </div>
+                      </div>
+                    
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>reporter role:</label>
+                          <select name="role" class="form-control" id="">
+                            <option value="rider" class="form-control">rider</option>
+                            <option value="supervisor" class="form-control">supervisor</option>
+                          </select>
+                          
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Issue Type*</label>
+                          <input type="text" class="form-control" name="issue_type" placeholder="Enter Stoping location..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>priority :</label>
+                          <select name="priority" class="form-control" id="">
+                            <option value="low" class="form-control">low</option>
+                            <option value="mediume" class="form-control">mediume</option>
+                            <option value="High" class="form-control">High</option>
+                          </select>
+                          
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Issue description</label>
+                          <textarea name="description" class="form-control" cols="3" rows="3" id=""></textarea>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Resolution Note</label>
+                          <textarea name="resolution" class="form-control" cols="3" rows="3" id=""></textarea>
+                        </div>
+                      </div>                      
+
+                      <div class="col-md-6">
+                        <div class="form-group" style="margin-top: 20px;" >
+
+                          <button class="btn btn-primary form-control" >Add Issue</button>
+                        </div>
+                      </div>
+
+
+
+                    </div> 
+                  </div><!-- /.box-body -->
+                </form>
+              </div><!-- /.box -->
+            </div><!--left row -->
+          </div><!-- /.row -->
+
+        </section><!-- /.content -->
+
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              
+              <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title">Data Table With Full parcel data</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                  <table id="example1" class="table table-bordered table-striped text-capitalize">
+                    <thead>
+                      <tr>
+                        <th>id</th>
+                        <th>Route_id</th>
+                        <th>Route_Detail</th>
+                        <th>Reported_By</th>
+                        <th>issue_type</th>
+                        <th>action_Taken</th>
+                        <th>created_at </th>
+                        <th>resolve_at </th>
+                        <th>Route_Status</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if(problems.length > 0) { %>
+                        <% let x = 1 %>
+                        <% problems.forEach(problem => { %>
+                          <tr>
+                            <td><%= problem.id %></td>
+                            <td><%= problem.route_id %></td>
+                            <td><%= problem.from_location %> to <%= problem.to_location %></td>
+                            <td><%= problem.Reported_By %></td>
+                            <td><%= problem.issue_type %></td>
+                            <td><%= problem.resolution_note %></td>
+                            <td><%= problem.created_at %></td>
+                            <td><%= problem.resolved_at %></td>
+                            <% if(problem.route_status == 'arrived'){%>
+                              <td class="text-success text-bold"><a href="/newroute/<%= problem.parcel_id %>" style="color:blue"> <%= problem.route_status %></a></td>
+                            <% }else{ %>
+                              <td class="text-success text-bold"><a href="/newroute/<%= problem.parcel_id %>" style="color:green"><%= problem.route_status %></a></td>
+                            <%} %>
+
+                            <% if(problem.status == 'resolved'){%>
+                              <td class="text-success text-bold" style="color:blue"> <%= problem.status %></td>
+                              <% }else{ %>
+                                <td class="text-danger text-bold"> <%= problem.status %></td>
+                            <%} %>
+                            <td>
+                              
+                              <a href="/resolve?parcel_id=<%= problem.parcel_id %>&&resolve_id=<%= problem.id %>&&status=<%= problem.route_status %>" class="d-flex justify-content-center align-items-center btn btn-primary">
+                                Resolve
+                              </a>
+                            </td>
+                            <td>
+                              
+                              <a href="/update_issue/<%= problem.parcel_id %>?update_id=<%= problem.id %>" class="d-flex justify-content-center align-items-center btn btn-primary">
+                                Update
+                              </a>
+                            </td>
+                            
+                          </tr>
+                        <% }) %>
+                      <% }else{ %>
+                        <tr>
+                          <td colspan = "9" class="text-center text-danger h4">
+                            No Record
+                          </td>
+                        </tr>
+                      <% } %>
+                      
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>id</th>
+                        <th>Route_id</th>
+                        <th>Route_Detail</th>
+                        <th>Reported_By</th>
+                        <th>issue_type</th>
+                        <th>action_Taken</th>
+                        <th>created_at </th>
+                        <th>resolve_at </th>
+                        <th>Route_Status</th>
+                        <th>Parcel_Status</th>
+                        <th>Action</th>                      
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+
+      </div><!-- /.content-wrapper -->
+      
+      <%- include('../layout/admin_footer.ejs') %>

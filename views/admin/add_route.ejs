@@ -1,0 +1,194 @@
+
+<%- include('../layout/admin_header.ejs') %>
+      <!-- Right side column. Contains the navbar and content of the page -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Route Registration
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="/route">view Route</a></li>
+            <li class="active">New Route page</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row d-flex justify-content-center ">
+            <div class="col-md-8">
+
+              <div class="box box-danger">
+                <div class="box-header">
+                  <h3 class="box-title">New Route</h3>
+                  <p class="text-mute text-bold ">Parcel Delivery Location: <%= parcel_destination %></p>
+                </div>
+                  <!-- alert -->
+                  <% if(error_msg && error_msg.length > 0){ %>
+                    <div class="alert alert-danger alert-dismissible  show" role="alert">
+                        <strong>Error!</strong>  <%= error_msg[0] %>              
+                    </div>
+                  <% } %>
+                  <% if(success_msg && success_msg.length > 0){ %>
+                    <div class="alert alert-success alert-dismissible  show" role="alert">
+                        <strong>Success!</strong>  <%= success_msg[0] %>              
+                    </div>
+                  <% } %>
+                  
+          
+                    <!-- end alert -->
+
+                <form action="/newroute/<%= track_id %>" method="post">
+                  <div class="box-body">
+                   
+                    <div class="row">
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Track Id</label>
+                          <input type="text" readonly value="<%= track_id%>" class="form-control" name="track_id" placeholder="Enter Track Id..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>route order</label>
+                          <input type="number" class="form-control" name="order" placeholder="Enter Order Number..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>From Location:</label>
+                          <input type="text" class="form-control" name="from_location" placeholder="Enter starting location..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>to Location</label>
+                          <input type="text" class="form-control" name="to_location" placeholder="Enter Stoping location..."/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Estimated Time</label>
+                          <input type="text" class="form-control" name="time" placeholder="E.G 1 day 2 hour 30 minutes"/>
+                        </div>
+                      </div>
+                      
+
+                      <div class="col-md-6">
+                        <div class="form-group">
+                          <label>Transit Mode:</label>
+                          <select name="mode" class="form-control" id="">
+                            <option value="flight" class="form-control">flight</option>
+                            <option value="ship" class="form-control">ship</option>
+                            <option value="car" class="form-control">car</option>
+                            <option value="bike" class="form-control">bike</option>
+                          </select>
+                          
+                        </div>
+                      </div>
+
+                      
+                      <div class="col-md-12">
+                        <div class="form-group">
+                          <button class="btn btn-primary" >Add new Route</button>
+                        </div>
+                      </div>
+
+
+
+                    </div> 
+                  </div><!-- /.box-body -->
+                </form>
+              </div><!-- /.box -->
+            </div><!--left row -->
+          </div><!-- /.row -->
+
+        </section><!-- /.content -->
+
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              
+              <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title">Data Table With Full parcel data</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                  <table id="example1" class="table table-bordered table-striped text-capitalize">
+                    <thead>
+                      <tr>
+                        <th>Order</th>
+                        <th>Tracking Id</th>
+                        <th>From Location</th>
+                        <th>to Location </th>
+                        <th>Transit Mode</th>
+                        <th>estimated Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if(routes.length > 0) { %>
+                        <% let x = 1 %>
+                        <% routes.forEach(route => { %>
+                          <tr>
+                            <td><%= route.step_number %></td>
+                            <td> 
+                              <a href="/parcel?tracking_id=<%= route.tracking_id %>">
+                                <%= route.tracking_id %>
+                              </a>
+                            </td>
+                            <td><%= route.from_location %></td>
+                            <td><%= route.to_location %></td>
+                            <td><%= route.transit_mode %></td>
+                            <td><%= route.estimated_time %></td>
+                            <td><%= route.status %></td>
+                            <td>
+                              
+                              <a href="/newissue/<%= route.tracking_id %>?route_id=<%= route.id %>" class="d-flex justify-content-center align-items-center btn btn-warning">
+                                issues
+                              </a>
+                              <a href="/arrived?route_id=<%= route.id %>&&parcel_id=<%= route.tracking_id %>" class="d-flex justify-content-center align-items-center btn btn-primary">
+                                Arrived
+                              </a>
+                            </td>
+                            
+                          </tr>
+                        <% }); %>
+                      <% }else{ %>
+                        <tr>
+                          <td colspan = "9" class="text-center text-danger h4">
+                            No Record
+                          </td>
+                        </tr>
+                      <% }; %>
+                      
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>Order</th>
+                        <th>Tracking Id</th>
+                        <th>From Location</th>
+                        <th>to Location </th>
+                        <th>Transit Mode</th>
+                        <th>estimated Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content-->
+      </div>
+ <%- include('../layout/admin_footer.ejs') %>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>AdminLTE 2 | Dashboard</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <!-- Bootstrap 3.3.2 -->
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />    
+    <!-- FontAwesome 4.3.0 -->
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <!-- Ionicons 2.0.0 -->
+    <link href="http://code.ionicframework.com/ionicons/2.0.0/css/ionicons.min.css" rel="stylesheet" type="text/css" />    
+     <!-- DATA TABLES -->
+     <link href="/plugins/datatables/dataTables.bootstrap.css" rel="stylesheet" type="text/css" />
+    <!-- Theme style -->
+    <link href="/dist/css/AdminLTE.min.css" rel="stylesheet" type="text/css" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins 
+         folder instead of downloading all of them to reduce the load. -->
+    <link href="/dist/css/skins/_all-skins.min.css" rel="stylesheet" type="text/css" />
+    <link href="/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" type="text/css" />
+    <!-- ion ion icon -->
+    <link href="https://unpkg.com/ionicons@4.5.10-0/dist/css/ionicons.min.css" rel="stylesheet">
+  </head>
+
+  <body class="skin-blue">
+    <div class="wrapper">
+      
+      <header class="main-header">
+        <!-- Logo -->
+        <a href="/parcel" class="logo text-capitalize"><b><%= userinfo.role %></b></a>
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top" role="navigation">
+          <!-- Sidebar toggle button-->
+          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <span class="sr-only">Toggle navigation</span>
+          </a>
+          <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav">
+              <!-- Messages: style can be found in dropdown.less-->
+              <li class="dropdown messages-menu">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <i class="fa fa-envelope-o"></i>
+                  <span class="label label-success"><%= details.countnotification %></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li class="header">You have <%= details.countnotification %> messages</li>
+                  <li>
+                    <!-- inner menu: contains the actual data -->
+                    <ul class="menu">
+                      <% if(notification.length > 0){ 
+                        notification.forEach( notify =>{ %>
+                          
+
+                          <li><!-- start message -->
+                            <a href="<%= notify.url %>">
+                              <div class="pull-left ">
+                                <small class="h2 text-dark  "><i class="icon ion-md-contact"></i>
+                                </small>
+                              </div>
+                              <h4>
+                                parcel <%= notify.status %>
+                                <small><i class="fa fa-clock-o"></i> <%= notify.time %></small>
+                              </h4>
+                              <p><%= notify.description %></p>
+                            </a>
+                          </li><!-- end message -->
+                                                  
+                      <% })
+                      }else{ %>
+                        <li><!-- start message -->
+                          <a href="#">
+                            <div class="pull-left ">
+                              <small class="h2 text-dark  "><i class="icon ion-md-contact"></i>
+                              </small>
+                            </div>
+                            <h4>
+                              Support Team
+                              <small><i class="fa fa-clock-o"></i> 5 mins</small>
+                            </h4>
+                            <p>Why not buy a new awesome theme?</p>
+                          </a>
+                        </li><!-- end message -->
+
+                      <%}%>
+  
+                    </ul>
+
+                  </li>
+                  <li class="footer"><a href="#">See All Messages</a></li>
+                </ul>
+              </li>
+              <!-- Notifications: style can be found in dropdown.less -->
+              
+              
+              <!-- User Account: style can be found in dropdown.less -->
+              <li class="dropdown user user-menu text-capitalize">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <small class="h3 text-dark  "><i class="icon ion-md-contact"></i></small>
+                  <span class="hidden-xs">                                
+                    <%= userinfo.name %>
+                  </span>
+                </a>
+                <ul class="dropdown-menu">
+                  <!-- User image -->
+                  <li class="user-header">
+                    <small class="h2 text-dark  "><i class="icon ion-md-contact"></i></small>
+                      <p>
+                        <%= userinfo.name %>
+                    </p>
+                  </li>                  
+                  <!-- Menu Footer-->
+                  <li class="user-footer">
+                    <div class="pull-left">
+                      <a href="#" class="btn btn-default btn-flat">Profile</a>
+                    </div>
+                    <div class="pull-right">
+                      <a href="/logout" class="btn btn-default btn-flat">Sign out</a>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+
+      <!-- Left side column. contains the logo and sidebar -->
+      <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+          <!-- Sidebar user panel -->
+          <div class="user-panel text-capitalize">
+            <div class="pull-left image">
+              <small class="h2" style="color: white;"><i class="icon ion-md-contact"></i></small>
+            </div>
+            <div class="pull-left info">
+              <p><%= userinfo.name %></p>
+
+              <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+            </div>
+          </div>
+          <!-- search form -->
+          <form action="/report" method="get" class="sidebar-form">
+            <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="Search..."/>
+              <span class="input-group-btn">
+                <button type='submit' name='search' id='search-btn' class="btn btn-flat"><i class="fa fa-search"></i></button>
+              </span>
+            </div>
+          </form>
+          <!-- /.search form -->
+          <!-- sidebar menu: : style can be found in sidebar.less -->
+          <ul class="sidebar-menu">
+            <li class="header">MAIN NAVIGATION</li>
+            <li class="active treeview">
+              <a href="#">
+                <i class="fa fa-dashboard"></i> <span>Dashboard</span> <i class="fa fa-angle-left pull-right"></i>
+              </a>
+              <ul class="treeview-menu">
+                <li class="active"><a href="/dashboard"><i class="fa fa-circle-o"></i> Dashboard</a></li>
+              </ul>
+            </li>
+            <li class="treeview">
+              <a href="#">
+                <i class="fa fa-pie-chart"></i>
+                <span>Charts</span>
+                <i class="fa fa-angle-left pull-right"></i>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="pages/charts/morris.html"><i class="fa fa-circle-o"></i> Morris</a></li>
+                <li><a href="pages/charts/flot.html"><i class="fa fa-circle-o"></i> Flot</a></li>
+                <li><a href="pages/charts/inline.html"><i class="fa fa-circle-o"></i> Inline charts</a></li>
+              </ul>
+            </li>
+
+            <li class="treeview">
+              <a href="#">
+                <i class="fa fa-edit"></i> <span>Forms</span>
+                <i class="fa fa-angle-left pull-right"></i>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="/newparcel"><i class="fa fa-circle-o"></i> New Pacel</a></li>
+                <li><a href="/register"><i class="fa fa-circle-o"></i> new User </a></li>
+              </ul>
+            </li>
+            <li class="treeview">
+              <a href="#">
+                <i class="fa fa-table"></i> <span>Tables</span>
+                <i class="fa fa-angle-left pull-right"></i>
+              </a>
+              <ul class="treeview-menu">
+                <li><a href="/parcel"><i class="fa fa-circle-o"></i> Parcel Table</a></li>
+                <li><a href="/route"><i class="fa fa-circle-o"></i>Route Tables</a></li>
+                <li><a href="/history"><i class="fa fa-circle-o"></i>History Tables</a></li>
+                <li><a href="/report"><i class="fa fa-circle-o"></i>Report Tables</a></li>
+              </ul>
+            </li>
+            <!-- <li>
+              <a href="pages/calendar.html">
+                <i class="fa fa-calendar"></i> <span>Calendar</span>
+                <small class="label pull-right bg-red">3</small>
+              </a>
+            </li>
+            <li><a href="documentation/index.html"><i class="fa fa-book"></i> Documentation</a></li>
+            <li class="header">Button</li>
+            <li><a href="/logout" class="btn btn-warning"><i class="icon ion-md-log"></i> logout</a></li>
+             -->
+          </ul>
+        </section>
+        <!-- /.sidebar -->
+      </aside>

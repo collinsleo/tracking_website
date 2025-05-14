@@ -1,0 +1,101 @@
+
+<%- include('../layout/admin_header.ejs') %>
+
+      <!-- Right side column. Contains the navbar and content of the page -->
+      <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+          <h1>
+            Route Table
+            <small>All routes are shown here</small>
+          </h1>
+          <ol class="breadcrumb">
+            <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="/chart">chart</a></li>
+            <li class="active">Routes tables</li>
+          </ol>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+          <div class="row">
+            <div class="col-xs-12">
+              
+              <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title">Data Table With Full parcel data</h3>
+                </div><!-- /.box-header -->
+                <div class="box-body">
+                  <table id="example1" class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Tracking Id</th>
+                        <th>From Location</th>
+                        <th>to Location </th>
+                        <th>Transit Mode</th>
+                        <th>estimated Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if(routes.length > 0) { %>
+                        <% let x = 1 %>
+                        <% routes.forEach(route => { %>
+                          <tr>
+                            <td><%= x++ %></td>
+                            <td><%= route.tracking_id %></td>
+                            <td><%= route.from_location %></td>
+                            <td><%= route.to_location %></td>
+                            <td><%= route.transit_mode %></td>
+                            <td><%= route.estimated_time %></td>
+                            <td><%= route.status %></td>
+                            <td>
+                              <div class="d-flex justify-content-center align-items-center btn btn-warning">
+                                Add Problem
+                              </div>
+                              <a href="/newroute/<%= route.tracking_id %>" class="d-flex justify-content-center align-items-center btn btn-primary">
+                                update
+                              </a>
+                            </td>
+                            
+                          </tr>
+                        <% }); %>
+                      <% }else{ %>
+                        <tr>
+                          <td colspan = "9">
+                            No Record
+                          </td>
+                        </tr>
+                      <% }; %>
+                      
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>#</th>
+                        <th>Tracking Id</th>
+                        <th>From Location</th>
+                        <th>to Location </th>
+                        <th>Transit Mode</th>
+                        <th>estimated Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div><!-- /.box-body -->
+              </div><!-- /.box -->
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </section><!-- /.content -->
+      </div><!-- /.content-wrapper -->
+      <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+          <b>Version</b> 2.0
+        </div>
+        <strong>Copyright &copy; 2014-2015 <a href="http://almsaeedstudio.com">Almsaeed Studio</a>.</strong> All rights reserved.
+      </footer>
+   <%- include('../layout/admin_footer.ejs') %>
