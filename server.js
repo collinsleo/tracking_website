@@ -23,8 +23,7 @@ const { log } = require("console")
 env.config();
 
 // seting up server
-const app = express()
-const port = 3000;
+const app = express();
 
 // ====================================================================
 // db connection
@@ -358,10 +357,7 @@ cron.schedule('*/5 * * * *', async () => {
             })
         }
 
-        
-
-        console.log("cron job just runed");
-        
+                
     } catch (err) {
       console.error('Error updating arrival status:', err);
     }
@@ -1481,6 +1477,7 @@ async function trackingHistory(tracking_id, route_id, status, from_location, to_
 
 
 // listening to server calls
+const port = process.env.PORT || 3000
 app.listen(port, ()=>{
     console.log("project currently running on port ",port);
     
