@@ -332,14 +332,13 @@
                 <table id="example1" class="container table table-bordered table-striped">
                     <thead>
                       <tr>
-                        <th>#</th>
-                        <th>track_id</th>
+                        <th class=" d-none d-lg-flex ">#</th>
                         <th>Current_Location</th>
                         <th>description</th>
                         <th>isuue </th>
                         <th>Resolve_note</th>
                         <th>Status</th>
-                        <th>Executed_Time </th>
+                        <th class="d-none d-lg-flex">Executed_Time </th>
                         <th>Expected_arival </th>
                       </tr>
                     </thead>
@@ -348,8 +347,7 @@
                         <% let x = 1 %>
                         <% reports.forEach(parcel => { %>
                           <tr class="text-capitalize">
-                              <td><%= x++ %></td>
-                              <td><%= parcel.tracking_id %></td>
+                              <td class="d-none d-lg-flex"><%= x++ %></td>
                             <% if(typeof parcel.current_location == "object"){ %>
                               <td>warehouse</td>
                             <% }else{ %>
@@ -374,7 +372,7 @@
                               <td class=" text-center text-bold"> <%= parcel.status %></td>
 
                             <% } %>
-                            <td>
+                            <td class="d-none d-lg-flex">
                               <%= parcel.created_at %>
                             </td>                            
                             <td>
@@ -393,14 +391,13 @@
                     </tbody>
                     <tfoot>
                       <tr>
-                        <th>#</th>
-                        <th>track id</th>
+                        <th class="d-none d-lg-flex">#</th>
                         <th>Current Location</th>
                         <th>description</th>
                         <th>isuue </th>
                         <th>Resolve note</th>
                         <th>Status</th>
-                        <th>Executed Time </th>
+                        <th class="d-none d-lg-flex">Executed Time </th>
                         <th>Expected arival </th>
                       </tr>
                     </tfoot>
