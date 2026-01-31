@@ -2,6 +2,7 @@
 const express = require("express")
 const ejs = require("ejs")
 const path = require('path')
+const fs = require('fs')
 const bodyParser = require("body-parser")
 const pg = require("pg")
 const {body, validationResult }= require("express-validator")
@@ -18,7 +19,9 @@ const {Pool} = require('pg')
 // const { userInfo } = require("os")
 const ms = require("ms")
 const { now } = require("moment/moment")
-const { log } = require("console")
+const { log, error } = require("console")
+//email send
+const sendMail = require('./middleware/nodemailer.js')
 // const expreesLayout = require("express-ejs-layouts")
 env.config();
 
@@ -44,6 +47,7 @@ db.connect((err, client, done)=>{
     }
     done();
 })
+
 
 // ====================================================================
 // global - side ====== app.use
@@ -153,6 +157,70 @@ app.get("/about", async(req,res)=>{
 app.get("/contact", async(req,res)=>{
     res.render("client-side/contact.ejs")
 })
+
+app.post("/contact",
+    [
+        body('name', "name must be at least 3 character").exists().isLength({min:3}).trim().escape(),
+        body('number', "mobile must at least 11 character").exists().isLength({min:11}).trim().escape(),
+        body('email', "email address is not valid").isEmail().normalizeEmail(),
+        body('subject', "subject must be at least 3 character").exists().isLength({min:3}).trim().escape(),
+        body('message', "subject must be at least 3 character").exists().isLength({min:3}).trim().escape(),
+    ], 
+     async(req,res)=>{
+
+    try{
+        const {name, email, number, subject, message} = req.body;
+        
+        
+        let errors = validationResult(req)
+        if(!errors.isEmpty()){
+            const alert = errors.array();
+            const errorAlert = []
+            alert.forEach(element => {
+                errorAlert.push(element.msg)               
+            });       
+            
+            req.flash('error',  errorAlert[0]);
+            res.redirect("/contact");
+        }else{
+            //sending email
+                
+            //message from user
+            const templatePath = path.join(__dirname, './views/emails/contact_us.html');
+            const template = fs.readFileSync(templatePath, 'utf-8');
+            
+
+            const host = req.protocol + '://' + req.get('host');
+            const redirect_link = `${host}/tracking`;  
+
+            const html = ejs.render(template, {
+                username: name,
+                message:  message,
+                email: email,
+                phone: number,
+                subject: subject,                
+                link: redirect_link,
+            });
+            
+            const mailsent = await sendMail({
+                to:  process.env.EMAIL,
+                subject: 'New Message From FireFoxExprex User',
+                html: html
+            })
+
+            console.log("mail sent status: ", mailsent);
+            req.flash('success', "we have received your message, our support team will get back to you shortly")
+            res.redirect("/contact");
+
+        }
+
+    }catch(error){
+        console.error("contact us form error:" + error.message)
+        req.flash('error', "something went wrong, Try again later")
+        res.redirect("/contact");
+    }
+})
+
 app.get("/faq", async(req,res)=>{
     res.render("client-side/faq.ejs")
 })
@@ -223,9 +291,10 @@ app.post("/register",
                         "INSERT INTO users (name, mobile, email, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING *",[name, mobile, email, passwordHash, role]
                     )  
                     const user = addUser.rows[0];
+
+                   
                     
                     req.login(user, (err)=>{
-                        console.log(err);
                         res.redirect("/dashboard")
                         
                     })
@@ -259,7 +328,7 @@ passport.use('local',
                     const userPassword = checkUser.rows[0].password
                     const checkPassword = await bcrypt.compare(password, userPassword)
                     if(!checkPassword){
-                        console.log("login failed, please check your");
+                        console.error("login failed, please check your");
                         
                         return done(null, false, {message: "login failed, please check your credentials"})
                     }else{
@@ -424,7 +493,56 @@ app.get("/dashboard", isAuthenticated, async (req, res)=>{
     }
        
 })
+// user======================================
 
+app.get('/user', isAuthenticated, async (req, res)=>{
+    let {user_id}=req.query
+
+    try{
+        if(user_id != undefined){
+            usersResult= await db.query(
+                "SELECT * FROM users WHERE id = $1 ORDER BY updated_at DESC",[user_id]
+            )
+            
+        }else{
+            usersResult = await db.query(
+                "SELECT * FROM users ORDER BY updated_at DESC"
+            )
+            
+        }
+
+        const users = usersResult.rows;       
+        
+        users.forEach(users => {
+            const created_at = users.created_at;
+            if(created_at == null){
+                users.created_at= null
+            }else{
+                users.created_at=  moment(new Date(users.created_at)).format('Do-MMMM-YYYY, h:mm A [GMT]Z ') 
+            }
+        });     
+        
+
+        res.render('admin/users.ejs', {users})
+    }catch (err) {
+        console.error("users display request failed: ", err.message)
+        res.render('admin/users.ejs', {users:{}, error:"somthing went wrong during the user display, please try again"})
+
+    }
+})
+
+// delete user
+app.get('/deleteuser/:user_id', isAuthenticated, async (req, res)=>{
+    const user_id = req.params.user_id;
+    try{
+        await db.query("DELETE FROM users WHERE id = $1", [user_id]);
+        req.flash('success', "User deleted successfully");
+        res.redirect("/user");
+    }catch(err){
+        console.error("Error deleting user:", err);
+        res.redirect("/user");
+    }
+})
 
 // parcel ====================================
 app.get("/newparcel",isAuthenticated, (req, res)=>{
@@ -480,6 +598,27 @@ app.post("/newparcel",isAuthenticated,
                 )
 
                 trackingHistory(trackingId,route_id=null,"processing", from_location=null, to_location=null, issue=null)
+                 //email
+                const templatePath = path.join(__dirname, './views/emails/parcel_registration.html');
+                const template = fs.readFileSync(templatePath, 'utf-8');
+                const host = req.protocol + '://' + req.get('host');
+                const redirect_link = `${host}/tracking`;  
+
+                const html = ejs.render(template, {
+                    username: rName,
+                    trackID: trackingId,
+                    from: sName,
+                    to:rName,
+                    link: redirect_link,
+                });
+
+                const mailsent = await sendMail({
+                    to: rEmail,
+                    subject: 'Parcel has been registered successfullly',
+                    html: html
+                })
+                console.log("mail sent status: ", mailsent);
+
 
                 req.flash('success', "successfuly registered a parcel")
                 res.redirect("/newroute/"+trackingId)
@@ -577,6 +716,7 @@ app.get('/parcel_update', isAuthenticated, async (req, res)=>{
     
 
 })
+
 
 
 app.get('/parcel', isAuthenticated, async (req, res)=>{
@@ -732,7 +872,7 @@ app.get('/parcel/:parcel_id/start', async (req, res)=>{
                 const date = new Date();
                 const arrival = parseDuration(routes.estimated_time);
                       
-                console.log(arrival, current_location)
+                // console.log(arrival, current_location)
         //         // update arival and status
                 await db.query(
                     "UPDATE routes set status = $1 WHERE id = $2", [status, routes.id]
@@ -743,6 +883,30 @@ app.get('/parcel/:parcel_id/start', async (req, res)=>{
                 )
 
                 await trackingHistory(parcel_id,routes.id,status,routes.from_location, routes.to_location, issue=null)
+
+                //sending email
+                const templatePath = path.join(__dirname, './views/emails/start_shipment.html');
+                const template = fs.readFileSync(templatePath, 'utf-8');
+                const host = req.protocol + '://' + req.get('host');
+                const redirect_link = `${host}/tracking`;  
+
+                const html = ejs.render(template, {
+                    username: parcelResult.receiver_name,
+                    trackID:  parcelResult.tracking_id,
+                    from: routes.from_location,
+                    to: routes.to_location,
+                    link: redirect_link,
+                });
+                // console.log(parcelResult);
+                
+                const mailsent = await sendMail({
+                    to:  parcelResult.receiver_email,
+                    subject: 'Parcel Shipment has Started',
+                    html: html
+                })
+
+                // console.log("mail sent status: ", mailsent);
+
                 
                 req.flash('success', "successfully started a parcel movement")
                 return res.redirect("/parcel")
@@ -771,7 +935,7 @@ app.get("/newroute/:tracking_id", isAuthenticated, async(req, res)=>{
         notify_id="";
         
     }else{
-        console.log("done!", notify_id);
+        // console.log("done!", notify_id);
         
         try{
             await db.query(
@@ -881,15 +1045,15 @@ app.get('/route', async (req, res)=>{
 
     try{
         const routeResult= await db.query(
-            "SELECT * FROM routes ORDER BY updated_at DESC, tracking_id ASC, step_number ASC"
+            "SELECT * FROM routes ORDER BY update_at DESC, tracking_id ASC, step_number ASC"
         )
         const routes = routeResult.rows;
-        
-        
+        console.log(routes);
+               
 
         res.render('admin/routes.ejs', {routes})
     }catch (err) {
-        console.error("Parcel display request failed: ", err.message)
+        console.error("Route display request failed: ", err.message)
         res.render('admin/routes.ejs', {error:"somthing went wrong during the parcel display, please try again"})
 
     }
@@ -1056,6 +1220,8 @@ app.post("/newissue/:parcel_id", isAuthenticated,
     
         let problems=[]
         const {track_id, route_id,reported_by,role,issue_type,priority,description,resolution} = req.body
+        // console.log(req.body);
+        
         const errors = validationResult(req)
         const errorAlart = []
          try{
@@ -1067,13 +1233,19 @@ app.post("/newissue/:parcel_id", isAuthenticated,
                 return res.redirect(`/newissue/${track_id}?route_id=${route_id}`)
 
             }else{
+                const parcel_data = await db.query(
+                    "SELECT * FROM parcels WHERE tracking_id = $1 LIMIT 1",
+                    [track_id]
+                )
+                const parcels =parcel_data.rows[0];
+
                 // CHECK THE PARCEL ID rout id and status in trasit or arrived
                 const avalableCheck = await db.query(
                     "SELECT * FROM routes WHERE tracking_id = $1 and id = $2 and status in ('arrived', 'in transit') limit 1",
                     [track_id, route_id]
                 )
                 const avalable = avalableCheck.rows
-                console.log(avalable);
+                // console.log(avalable);
                 
                 // avoiding problem duplicate
                 const duplicateResult = await db.query(
@@ -1091,23 +1263,43 @@ app.post("/newissue/:parcel_id", isAuthenticated,
                     return res.redirect(`/newissue/${track_id}?route_id=${route_id}`)
                 }else{
 
-                        const report = await db.query(
-                            "INSERT INTO problem_reports (parcel_id, route_id,reported_by,reporter_role,issue_type,priority,description, resolution_notes) VALUES ($1, $2, $3, $4, $5, $6, $7,$8)",
-                            [track_id, route_id,reported_by,role,issue_type,priority,description,resolution]
-                        )
+                    const report = await db.query(
+                        "INSERT INTO problem_reports (parcel_id, route_id,reported_by,reporter_role,issue_type,priority,description, resolution_notes) VALUES ($1, $2, $3, $4, $5, $6, $7,$8)",
+                        [track_id, route_id,reported_by,role,issue_type,priority,description,resolution]
+                    )
 
-                        const issue = `${issue_type} - ${description}`;
-                        await trackingHistory(track_id,route_id,"delayed",avalable[0].from_location, avalable[0].to_location,issue)
-                        const history =generateDescription("delayed", avalable[0].from_location, avalable[0].to_location,issue)
-                          
-                        const updateparcel = await db.query(
-                            "UPDATE parcels set status = $1 WHERE tracking_id = $2",["delayed", track_id]
-                        )
+                    const issue = `${issue_type} - ${description}`;
+                    await trackingHistory(track_id,route_id,"delayed",avalable[0].from_location, avalable[0].to_location,issue)
+                    const history =generateDescription("delayed", avalable[0].from_location, avalable[0].to_location,issue)
+                        
+                    const updateparcel = await db.query(
+                        "UPDATE parcels set status = $1 WHERE tracking_id = $2",["delayed", track_id]
+                    )
 
-                        req.flash('success', "successfuly added the report message")
-                        return res.redirect(`/newissue/${track_id}?route_id=${route_id}`)
+                    //sending email
+                    const templatePath = path.join(__dirname, './views/emails/parcel_problem.html');
+                    const template = fs.readFileSync(templatePath, 'utf-8');
+                    const host = req.protocol + '://' + req.get('host');
+                    const redirect_link = `${host}/tracking`;  
 
+                    const html = ejs.render(template, {
+                        username: parcels.receiver_name || 'user',
+                        trackID:  track_id,
+                        issue: issue_type,
+                        description: description,
+                        link: redirect_link,
+                    });
                     
+                    const mailsent = await sendMail({
+                        to:  parcels.receiver_email,
+                        subject: 'Shipment delay notification',
+                        html: html
+                    })
+
+                    console.log("mail sent status: ", mailsent);
+
+                    req.flash('success', "successfuly added the report message")
+                    return res.redirect(`/newissue/${track_id}?route_id=${route_id}`)
 
                 }
 
@@ -1129,6 +1321,13 @@ app.get("/resolve", isAuthenticated, async(req, res)=>{
         const now = Date.now()
         const resolve_at = new Date(now)
 
+        // get parcel data
+        const parcel_data = await db.query(
+            "SELECT * FROM parcels WHERE tracking_id = $1",
+            [parcel_id]
+        )
+        const parcels = parcel_data.rows[0];
+
         //get problem status
         const getproblem = await db.query(
             "SELECT * FROM problem_reports where id = $1 ", [resolve_id]
@@ -1141,13 +1340,6 @@ app.get("/resolve", isAuthenticated, async(req, res)=>{
             "SELECT * FROM routes where tracking_id = $1 and status = $2 order by id desc", [parcel_id,status]
         )
         const location = getlocation.rows
-        console.log(location[0].from_location);
-        
-
-// update problem status to resolved
-        // const problemUpdate = await db.query(
-        //     "UPDATE problem_reports set status = 'resolved', resolved_at= $1 WHERE id = $2 and parcel_id = $3 ",[resolve_at,resolve_id,parcel_id]
-        // )
 
         if(problemstatus == "resolved"){
             req.flash("error","This issue has already been resolved" )
@@ -1178,11 +1370,34 @@ app.get("/resolve", isAuthenticated, async(req, res)=>{
             }else{
 
                 const parcelUpdate = await db.query(
-                    "UPDATE parcels set status = $1 WHERE tracking_id = $2",[status, parcel_id]
+                    "UPDATE parcels set status = $1 WHERE tracking_id = $2 returning receiver_name",[status, parcel_id]
                 )
 
-                issue = `succefuly resoved all parcel issues`
+                issue = `succefully resoved all parcel issues`
                 await trackingHistory(parcel_id,location[0].id,"resolved",location[0].from_location,location[0].to_location,issue);
+
+
+                //sending email
+                
+                const templatePath = path.join(__dirname, './views/emails/parcel_resolve.html');
+                const template = fs.readFileSync(templatePath, 'utf-8');
+                const host = req.protocol + '://' + req.get('host');
+                const redirect_link = `${host}/tracking`;  
+
+                const html = ejs.render(template, {
+                    username: parcels.receiver_name,
+                    trackID:  parcel_id,
+                    link: redirect_link,
+                });
+                // console.log(parcelResult);
+                
+                const mailsent = await sendMail({
+                    to:  parcels.receiver_email,
+                    subject: 'Parcel Shipment Delay',
+                    html: html
+                })
+
+                console.log("mail sent status: ", mailsent);
             
                 req.flash("success","successfuly resove parcel issues" )
                 return res.redirect('/newissue/'+parcel_id)
@@ -1205,10 +1420,16 @@ app.get("/arrived", isAuthenticated, async(req,res)=>{
     const {route_id, parcel_id} = req.query
     let status = "arrived"
     try {
+          // get parcel data
+        const parcel_data = await db.query(
+            "SELECT * FROM parcels WHERE tracking_id = $1",
+            [parcel_id]
+        )
+        const parcels = parcel_data.rows[0];
 
         // checking parcel that have issues 
         const problemCheck= await db.query(
-            "SELECT parcels.status as parcel_status,  problem_reports.* FROM problem_reports join parcels on problem_reports.parcel_id = parcels.tracking_id WHERE parcels.tracking_id = $1 and problem_reports.status = 'open'",[parcel_id]
+            "SELECT parcels.delivery_location, parcels.receiver_email, parcels.receiver_name, parcels.status as parcel_status,  problem_reports.* FROM problem_reports join parcels on problem_reports.parcel_id = parcels.tracking_id WHERE parcels.tracking_id = $1 and problem_reports.status = 'open'",[parcel_id]
         )
         const problem  = problemCheck.rows
         
@@ -1258,8 +1479,62 @@ app.get("/arrived", isAuthenticated, async(req,res)=>{
                         "UPDATE parcels SET status = $1 WHERE tracking_id = $2 ",[status, parcel_id]
                     )
 
-                    await trackingHistory(parcel_id,route_id, status = "arrived", routes[0].from_location, routes[0].to_location,issue=null);
-                    await checkDeliivryTime(parcel_id)
+                    let delivery_status = await checkDeliivryTime(parcel_id)
+                    if(delivery_status == "delivered"){
+                        // console.log(delivery_status);
+                        
+                        await trackingHistory(parcel_id,route_id, status = "delivered", routes[0].from_location, routes[0].to_location,issue=null);
+
+                        
+                        //send mail
+                        const templatePath = path.join(__dirname, './views/emails/parcel_delivered.html');
+                        const template = fs.readFileSync(templatePath, 'utf-8');
+                        const host = req.protocol + '://' + req.get('host');
+                        const redirect_link = `${host}/tracking`;  
+
+                        const html = ejs.render(template, {
+                            username: parcels.receiver_name,
+                            trackID: parcel_id,
+                            delivered_to:  parcels.delivery_location,
+                            link: redirect_link,
+                        });
+                        // console.log(parcelResult);
+                        
+                        const mailsent = await sendMail({
+                            to:  parcels.receiver_email,
+                            subject: 'Parcel Delivery Confirmation',
+                            html: html
+                        })
+
+                        console.log("mail sent status: ", mailsent);
+                        
+                    }else{
+                        // console.log(delivery_status);
+                        await trackingHistory(parcel_id,route_id, status = "arrived", routes[0].from_location, routes[0].to_location,issue=null);
+
+                        const templatePath = path.join(__dirname, './views/emails/parcel_problem.html');
+
+                        //send mail
+                        // const template = fs.readFileSync(templatePath, 'utf-8');
+                        // const host = req.protocol + '://' + req.get('host');
+                        // const redirect_link = `${host}/tracking`;  
+
+                        // const html = ejs.render(template, {
+                        //     // username: problem.receiver_name,
+                        //     trackID:  parcel_id,
+                        //     link: redirect_link,
+                        // });
+                        // // console.log(parcelResult);
+                        
+                        // const mailsent = await sendMail({
+                        //     to:  parcelResult.receiver_email,
+                        //     subject: 'Parcel Shipment Delay',
+                        //     html: html
+                        // })
+
+                        // console.log("mail sent status: ", mailsent);
+
+                    }
                     req.flash("success", " route status changed to arrived");
                     return res.redirect(`/newroute/${parcel_id}`)
                 }
@@ -1296,7 +1571,11 @@ async function checkDeliivryTime(parcel_id) {
             await db.query(
                 "UPDATE parcels SET status = $1 WHERE tracking_id = $2 ",["delivered",parcel_id]
             )
+
+            return "delivered";
                         
+        }else{
+            return "arrived";
         }
 
     }catch (err){
@@ -1367,7 +1646,6 @@ app.get('/tracking', async(req,res)=>{
                     
             const problemResult = await db.query(
                 "SELECT * FROM problem_reports WHERE parcel_id=$1  order by id asc",[track_id]
-
             )
             const problem = problemResult.rows    
             // console.log(problem[0].issue_type);
@@ -1407,7 +1685,7 @@ app.get('/tracking', async(req,res)=>{
                             }
                         }
                     });
-                    res.render("client-side/tracking.ejs", {reports})
+                    res.render("client-side/tracking.ejs", {reports,parcel : parcel[0]})
                 
 
                 }else{
@@ -1424,6 +1702,13 @@ app.get('/tracking', async(req,res)=>{
             return res.redirect(`/tracking`)     
         }
     }
+})
+
+
+
+// 404 page
+app.use((req,res)=>{
+    res.status(404).render('client-side/page404.ejs')
 })
 
 function generateDescription(status,from_location,to_location, issue=null) {
@@ -1472,6 +1757,8 @@ async function trackingHistory(tracking_id, route_id, status, from_location, to_
     )
     
 }
+
+
 
 
 

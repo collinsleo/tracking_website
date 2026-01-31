@@ -6,19 +6,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <meta name="description" content="" />
         <meta name="author" content="" />
-        <title>Register - SB Admin</title>
+        <title>Register </title>
         <link href="loginStyle/styles.css" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     </head>
-    <body style="background-color: #1037B6;">
+    <body style="background: #ec8531;">
         <div id="layoutAuthentication">
             <div id="layoutAuthentication_content">
                 <main>
                     <div class="container">
                         <div class="row justify-content-center">
                             <div class="col-lg-7">
-                                <div class="card shadow-lg border-0 rounded-lg mt-5">
-                                    <div class="card-header"><h3 class="text-center font-weight-light my-4">Create Account</h3></div>
+                                <div class="card  border-0 rounded-lg mt-5" style="box-shadow: 5px 5px 20px rgb(112, 109, 109);">
+                                    <div class="card-header" style="background: #ec8531;"><h3 class="text-center font-weight-light my-4">Create Account</h3></div>
                                     <!-- alert -->
                                     <% if(typeof error !== "undefined"){ %>
                                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -62,13 +62,15 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button type="submit" class="mt-4 mb-0 btn btn-md form-control text-light" style="background-color: #1037B6;">
+                                            <button type="submit" class="mt-4 mb-0 btn btn-md form-control text-dark" style="background: #ec8531;">
                                                 <div class="d-grid">Create Account</div>
                                             </button>
                                         </form>
                                     </div>
                                     <div class="card-footer text-center py-3">
-                                        <div class="small"><a href="/login">Have an account? Go to login</a></div>
+                                        <div class="small"><a href="/login" style="text-decoration: none; color: black;">Have an account? Go to login</a></div>
+                                        <div class="small"><a href="/" class="fw-bold text-dark" style="text-decoration: none;">Home</a></div>
+
                                     </div>
                                 </div>
                             </div>
@@ -77,10 +79,10 @@
                 </main>
             </div>
             <div id="layoutAuthentication_footer">
-                <footer class="py-4 bg-warning mt-auto">
+                <footer class="py-2 bg-dark mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
-                            <div class="h4 text-bold ">Nomicon</div>
+                            <!-- <div class="h4 text-bold ">Nomicon</div> -->
                             <div>
                                 <div class="text-muted">Copyright &copy; Your Website 2025</div>
                                 

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+<body style="font-family: Arial; background:#f4f6f8; padding:20px;">
+  <div style="max-width:600px; background:#ffffff; margin:auto; padding:20px; border-radius:6px;">
+    
+    <h2 style="color:#e27c08;">Parcel Registered</h2>
+
+    <p>Hello <strong><%= username %></strong>,</p>
+
+    <p>Your parcel has been successfully registered with <strong>FireFoxExprex Logistics</strong>.</p>
+
+    <h4>Parcel Details</h4>
+    <ul style="text-transform: capitalize;">
+      <li><strong>Tracking ID:</strong> <%= trackID %></li>
+      <li><strong>From:</strong><%= from %></li>
+      <li><strong>To:</strong><%= to %> </li>
+      <li><strong>Status:</strong> Registered</li>
+    </ul>
+
+    <a href="<%= link %> " 
+       style="display:inline-block; background:#e27c08; color:white; padding:10px 15px; text-decoration:none; border-radius:4px;">
+       Track Parcel
+    </a>
+
+    <p style="margin-top:20px;">Thank you for trusting us.</p>
+
+    <hr>
+
+    <small>
+      FireFoxExprex Logistics<br>
+      support@FireFoxExprex.com
+    </small>
+  </div>
+</body>
+</html>
